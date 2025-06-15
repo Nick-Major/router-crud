@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
-import fetchData from "../utils/fetchData";
-import likeImg from '../assets/like.png';
-import commentImg from '../assets/comment.png';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import fetchData from '../utils/fetchData';
+import PostCard from './PostCard';
+import CreatePostButton from './CreatePostButton';
 
 const ListPosts = () => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
     const API_URL = 'http://localhost:3000/posts';
 
     useEffect(() => {
@@ -18,7 +20,11 @@ const ListPosts = () => {
                 if (result.error) {
                     setError(result.error);
                 } else {
-                    setPosts(result || []);
+                    // Сортируем посты по дате (новые сначала)
+                    const sortedPosts = result.sort((a, b) => 
+                        new Date(b.created) - new Date(a.created)
+                    );
+                    setPosts(sortedPosts || []);
                 }
             } catch (err) {
                 setError(err.message);
@@ -30,6 +36,15 @@ const ListPosts = () => {
         fetchPosts();
     }, []);
 
+    // Функция для добавления нового поста в начало списка
+    const handleNewPost = (newPost) => {
+        setPosts(prevPosts => [newPost, ...prevPosts]);
+    };
+
+    const handlePostClick = (postId) => {
+        navigate(`/posts/${postId}`);
+    };
+
     if (isLoading) {
         return <div className="loading">Загрузка постов...</div>;
     }
@@ -38,33 +53,25 @@ const ListPosts = () => {
         return <div className="error">Ошибка: {error}</div>;
     }
 
-    if (!posts.length) {
-        return <div className="empty">Постов пока нет</div>;
-    }
-
     return (
-        <div className="posts-list">
-            {posts.map(post => (
-                <div className="post" key={post.id}>
-                    <img src={post.avatarUrl} alt="Аватар пользователя" />
-                    <div className="user-info">
-                        <span className="user-name">{post.author || "Аноним"}</span>
-                        <span className="created">{new Date(post.createdAt).toLocaleString()}</span>
-                    </div>
-                    <p className="post-content">{post.content}</p>
-                    <div className="post-actions">
-                        <button className="action-btn">
-                            <img src={likeImg} alt="Лайк" />
-                            <span>Нравится</span>
-                        </button>
-                        <button className="action-btn">
-                            <img src={commentImg} alt="Комментарий" />
-                            <span>Комментировать</span>
-                        </button>
-                    </div>
-                </div>
-            ))}
-        </div>
+        <>
+            {/* Передаем handleNewPost в CreatePostButton */}
+            <CreatePostButton onPostCreated={handleNewPost} />
+            
+            <div className="posts-list">
+                {posts.length ? (
+                    posts.map(post => (
+                        <PostCard 
+                            key={post.id} 
+                            post={post} 
+                            onClick={() => handlePostClick(post.id)}
+                        />
+                    ))
+                ) : (
+                    <div className="empty">Постов пока нет</div>
+                )}
+            </div>
+        </>
     );
 };
 

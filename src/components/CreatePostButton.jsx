@@ -1,31 +1,22 @@
-import { useState } from 'react';
-import CreatePostForm from './CreatePostForm';
+import { useNavigate } from 'react-router-dom';
 
-const CreatePostButton = () => {
-  const [showForm, setShowForm] = useState(false);
+const CreatePostButton = ({ onPostCreated }) => {
+    const navigate = useNavigate();
 
-  const handleButtonClick = () => {
-    setShowForm(true);
-  };
+    const handleClick = () => {
+        navigate('/posts/new', {
+            state: { onPostCreated } // Передаем callback через роутер
+        });
+    };
 
-  const handleCancel = () => {
-    setShowForm(false);
-  };
-
-  return (
-    <div className="post-container">
-      {showForm ? (
-        <CreatePostForm onCancel={handleCancel} />
-      ) : (
+    return (
         <button 
-          className="create-post-btn" 
-          onClick={handleButtonClick}
+            className="create-post-btn" 
+            onClick={handleClick}
         >
-          Создать пост
+            Создать пост
         </button>
-      )}
-    </div>
-  );
+    );
 };
 
 export default CreatePostButton;

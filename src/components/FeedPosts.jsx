@@ -1,9 +1,6 @@
-// import { useState, useEffect } from "react";
-// import fetchData from "../utils/fetchData";
-
 const FeedPosts = ({ children }) => {
     return (
-        <div className="posts">
+        <div className="posts-container">
             {children}
         </div>
     )
