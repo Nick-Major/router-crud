@@ -1,12 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 
-const CreatePostButton = ({ onPostCreated }) => {
+const CreatePostButton = () => {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate('/posts/new', {
-            state: { onPostCreated } // Передаем callback через роутер
-        });
+        navigate('/posts/new');
     };
 
     return (

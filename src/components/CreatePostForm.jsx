@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { usePosts } from "../context/PostsContext"
 import fetchData from "../utils/fetchData"
 
 const CreatePostForm = () => {
@@ -7,9 +8,7 @@ const CreatePostForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
-  const location = useLocation()
-
-  const onPostCreated = location.state?.onPostCreated
+  const { fetchPosts } = usePosts()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,21 +24,19 @@ const CreatePostForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: 0,
           content: postText,
         }),
       })
+      console.log("Response from server:", response)
 
       if (response.error) {
         throw new Error(response.error)
       }
 
-      if (onPostCreated) {
-        onPostCreated(response)
-      }
-
-      navigate("/")
+      await fetchPosts();
+      navigate("/", {replace: true})
     } catch (err) {
+      console.error("Error:", err)
       setError(err.message || "Ошибка при создании поста")
     } finally {
       setIsSubmitting(false)
@@ -49,7 +46,7 @@ const CreatePostForm = () => {
   return (
     <div className="create-post-form">
       <div className="form-header">
-        <h3>Создать новый пост</h3>
+        <h3 className="create-post-title">Создать новый пост</h3>
         <button
           className="close-btn"
           onClick={() => navigate("/")}
@@ -63,6 +60,7 @@ const CreatePostForm = () => {
 
       <form onSubmit={handleSubmit}>
         <textarea
+          className="new-post-textarea"
           value={postText}
           onChange={(e) => setPostText(e.target.value)}
           placeholder="Что у вас нового?"
@@ -84,4 +82,4 @@ const CreatePostForm = () => {
   )
 }
 
-export default CreatePostForm
+export default CreatePostForm;
